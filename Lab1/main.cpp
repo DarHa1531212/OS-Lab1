@@ -45,12 +45,12 @@ int RemplirFichier(int largeurDeMatrice, int hauteurDeMatrice, int nbredeMatrice
   * @retval retourne 0 si la fonction s'est bien déroulée
   */
  
-int TransposerMatrice(vector<vector<int>> matriceATransposer)
+vector<vector<unsigned long int>> TransposerMatrice(vector<vector<unsigned long int>> matriceATransposer)
 {
     int largeurDeMatrice = matriceATransposer.size();
     int hauteurDeMatrice = matriceATransposer.at(0).size();
 
-    vector<vector<int>> matriceTranspose;
+    vector<vector<unsigned long int>> matriceTranspose;
 
     for (int i = 0; i < largeurDeMatrice; i++)
     {
@@ -59,8 +59,8 @@ int TransposerMatrice(vector<vector<int>> matriceATransposer)
             matriceTranspose.at(j).at(i) = matriceATransposer.at(i).at(j);
         }
     }
-    cout << endl;
-    return 0;
+   
+    return matriceTranspose;
 }
 
  /**
@@ -72,8 +72,8 @@ int TransposerMatrice(vector<vector<int>> matriceATransposer)
   * @param  &fichierDeMatrices: Le fichier texte qqui contient les matrices
   * @retval retourne le vecteur qui contient la matrice lue
  */
-vector<vector<int>> LireMatrice(int largeurDeMatrice, int hauteurDeMatrice, int nbrIteration, ifstream &fichierDeMatrices) {
-    vector<vector<int>> matriceTemporaire;
+vector<vector<unsigned long int>> LireMatrice(int largeurDeMatrice, int hauteurDeMatrice, int nbrIteration, ifstream &fichierDeMatrices) {
+    vector<vector<unsigned long int>> matriceTemporaire;
 
     int positionCurseur = nbrIteration*hauteurDeMatrice;
     fichierDeMatrices.seekg(positionCurseur, ios::beg);
@@ -91,9 +91,9 @@ vector<vector<int>> LireMatrice(int largeurDeMatrice, int hauteurDeMatrice, int 
 
             ligne = ligne.substr(positionEspace + 1, (ligne.length() - positionEspace));
 
-            int nombre = stoi(nombreEnString);
+            unsigned long int nombre = strtoul(nombreEnString.c_str(), NULL, 0);
 
-            matriceTemporaire.at(j).at(i) = nombre;
+            matriceTemporaire[i][j] = nombre;
 
         }
     }
@@ -138,26 +138,56 @@ void Produit(int colonne, int rangee, int matriceA[10][10], int matriceB[10][10]
     }
 }
 
+void EcrireMatricesDansFichierTexte( vector<vector<vector<unsigned long int>>> vecteurDeMatrices, string nomFichier)
+{
+    ofstream fichierMatrices;
+    fichierMatrices.open(nomFichier.c_str(), ofstream::binary);
+    
+    int largeurDeMatrice = vecteurDeMatrices.at(0).at(0).size();
+    int hauteurDeMatrice = vecteurDeMatrices.at(0).size();
+
+    for(int h=0; h<vecteurDeMatrices.size();h++)
+    {
+        for (int i = 0; i < hauteurDeMatrice; i++)
+        {
+        
+            for (int j = 0; j < largeurDeMatrice; j++)
+            {
+                fichierMatrices<<vecteurDeMatrices.at(h).at(i).at(j)<<" ";
+            }
+            fichierMatrices << endl;
+        }
+        fichierMatrices<<endl;
+    }
+        
+    fichierMatrices.close();
+
+}
+
 
 void ChargerMatricesEnMemoireEtLesTransposer(int largeurDeMatrices, int hauteurDeMatrice, int nombreDeMatrices, string nomDuFichierDeMatrices)
 {
     ifstream fichierDeMatrices;
     fichierDeMatrices.open(nomDuFichierDeMatrices.c_str());
 
-    list<vector<vector<int>>> listeDeMatrices;
-    list<vector<vector<int>>> listeDeMatricesTransposees;
-    int matriceTemporaire [largeurDeMatrices][hauteurDeMatrice];
+    vector<vector<vector<unsigned long int>>> vecteurDeMatrices;
+    vector<vector<vector<unsigned long int>>> vecteurDeMatricesTransposees;
+    //int matriceTemporaire [largeurDeMatrices][hauteurDeMatrice];
 
     for(int i = 0; i < nombreDeMatrices; i++) {
 
-        vector<vector<int>> matrice = LireMatrice(largeurDeMatrices, hauteurDeMatrice, i, fichierDeMatrices);
-        listeDeMatrices.push_front(matrice);
+        vector<vector<unsigned long int>> matrice = LireMatrice(largeurDeMatrices, hauteurDeMatrice, i, fichierDeMatrices);
+        vecteurDeMatrices.insert(vecteurDeMatrices.begin(), matrice);
 
-        //vector<vector<int>> matriceTransposee = TransposerMatrice()
+        vector<vector<unsigned long int>> matriceTransposee = TransposerMatrice(matrice);
+        vecteurDeMatricesTransposees.insert(vecteurDeMatricesTransposees.begin(), matriceTransposee);
 
 
     }
 
+    EcrireMatricesDansFichierTexte(vecteurDeMatricesTransposees, "mat_transp.txt");
+
+    
 
 
 }
@@ -166,8 +196,9 @@ void ChargerMatricesEnMemoireEtLesTransposer(int largeurDeMatrices, int hauteurD
 
 int main() {
 
-    RemplirFichier(100, 200, 1024, 2000);
+    RemplirFichier(100, 200, 1024, 500);
     ChargerMatricesEnMemoireEtLesTransposer(100, 200, 1024, "mat_input.txt");
+
 
     return 0;
 }
