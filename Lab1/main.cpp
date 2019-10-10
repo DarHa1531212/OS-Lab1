@@ -80,8 +80,6 @@ vector<vector<unsigned long int>> TransposerMatrice(vector<vector<unsigned long 
     return matriceTranspose;
 }
 
-//TEST DE MARC
-//PATATE
 
  /**
   * @brief  lit une matrice du fichier
@@ -137,13 +135,17 @@ vector<vector<unsigned long int>> Produit(vector<vector<unsigned long int>> matr
 
     int temp;
     
-    for (int i = 0; i < hauteurMatriceA; i++)//nombre ligne matrice1
+    for (int i = 0; i < hauteurMatriceA -1; i++)//nombre ligne matrice1
     {
     
-        for (int j = 0; j < largeurMatriceB; j++)//le nombre de colonnes de la matrice2
+        for (int j = 0; j < largeurMatriceB -1; j++)//le nombre de colonnes de la matrice2
         {
-            for (int k = 0; k < hauteurMatriceA; k++)// le nombre colonnes matrice1
+            for (int k = 0; k < largeurMatriceA -1; k++)// le nombre colonnes matrice1
             {
+                if (k == 99)
+                {
+                    cout << "99 turn";
+                }
                 temp= (matriceA[i][k] * matriceB[k][j]);
                 case1 = case1 + temp;
             }
@@ -154,7 +156,10 @@ vector<vector<unsigned long int>> Produit(vector<vector<unsigned long int>> matr
                 y = 0;
             }
             else
+            {  
                 y++;
+            }
+              
         }
     }
 
