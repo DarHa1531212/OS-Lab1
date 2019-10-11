@@ -133,7 +133,7 @@ vector<vector<unsigned long int>> Produit(vector<vector<unsigned long int>> matr
 	int hauteurMatriceB = matriceB.size();
 
 	vector<vector<unsigned long int>>matriceC(hauteurMatriceA, vector<unsigned long int>(largeurMatriceB));
-	//test commit
+	
 	int temp;
 
 	for (int k = 0; k < hauteurMatriceA; k++)//nombre ligne matrice1
