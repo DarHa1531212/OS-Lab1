@@ -181,7 +181,7 @@ int EcrireMatricesDansFichierTexte(vector<vector<vector<unsigned long int>>> vec
 	int largeurDeMatrice = vecteurDeMatrices.at(0).at(0).size();
 	int hauteurDeMatrice = vecteurDeMatrices.at(0).size();
 
-	for (int h = 0; h<100; h++)
+	for (int h = 0; h<1024; h++)
 	{
 		for (int i = 0; i < hauteurDeMatrice; i++)
 		{
@@ -227,6 +227,18 @@ vector<vector<vector<unsigned long int>>> ChargerMatricesEnMemoireEtLesTranspose
 
 }
 
+
+/**
+* @brief  écrit le contenu du vecteur de matrices dans un fichier texte
+* @note
+* @param  vecteurDeMatrices: contient toutes les matrices
+* @param  nomFichier: le nom du fichier dans lequel les matrices seront écrites
+* @retval retourne 0 si la fonction s'est bien déroulée
+*/
+
+
+
+
 /**
 * @brief  point d'entrée du programme
 * @note   les étapes du programmes sont sous forme de fonction dans le main
@@ -236,12 +248,22 @@ int main() {
 
 	vector<vector<vector<unsigned long int>>> vecteurDeMatricesOriginal = RemplirFichier(100, 200, 1024, 500);
 	vector<vector<vector<unsigned long int>>>vecteurDeMatricesTransposees = ChargerMatricesEnMemoireEtLesTransposer(100, 200, 1024, "mat_input.txt");
+
+	//vecteur produit matriciel: 1024 matrices de 200 par 200
+	vector<vector<vector<unsigned long int>>>vecteurProduitMatriciel1024(1204, vector<vector<unsigned long int>>(200, vector<unsigned long int>(200)));
+
+
 	EcrireMatricesDansFichierTexte(vecteurDeMatricesTransposees, "mat_transp.txt");
 
+
+	// on rempli les matrices du vecteur de matrices 200 par 200 des 1024 matrices résultant du premier produit matriciel
 	for (int d = 0; d < 1024; d++)
 	{
-		Produit(vecteurDeMatricesOriginal[d], vecteurDeMatricesTransposees[d]);
+		vecteurProduitMatriciel1024[d]=Produit(vecteurDeMatricesOriginal[d], vecteurDeMatricesTransposees[d]);
 		cout << "matrice faite" << endl;
 	}
+	
+	EcrireMatricesDansFichierTexte(vecteurProduitMatriciel1024, "mat_1024.txt");
+
 	return 0;
 }
