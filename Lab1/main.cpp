@@ -227,15 +227,23 @@ vector<vector<vector<unsigned long int>>> ChargerMatricesEnMemoireEtLesTranspose
 
 }
 
-
 /**
-* @brief  écrit le contenu du vecteur de matrices dans un fichier texte
+* @brief  Affecter les matrices pour le produits matriciel de la première matrice avec la dernière, la deuxième avec l'avant dernière...
 * @note
-* @param  vecteurDeMatrices: contient toutes les matrices
-* @param  nomFichier: le nom du fichier dans lequel les matrices seront écrites
-* @retval retourne 0 si la fonction s'est bien déroulée
+* @param  vecteurProduitMatrice: contient toutes les matrices
+* @retval retourne un vecteur de matrices contenant 2 fois moins de matrice que le vecteur passé en paramètre.
 */
+vector<vector<vector<unsigned long int>>>AffecterMatricesPourProduitMatriciel(vector<vector<vector<unsigned long int>>>vecteurProduitMatrice)
+{
+	vector<vector<vector<unsigned long int>>>vecteurProduitMatricielRetourne((vecteurProduitMatrice.size() / 2), 
+		vector<vector<unsigned long int>>((vecteurProduitMatrice.(0).size()), vector<unsigned long int>(vecteurProduitMatrice.(0).(0).size()));
 
+	for (int x = 0; x < (vecteurProduitMatrice.size() / 2); x++)
+	{
+		vecteurProduitMatricielRetourne[x] = Produit(vecteurProduitMatrice[x], vecteurProduitMatrice[(vecteurProduitMatrice.size() - x) - 1]);
+	}
+	return vecteurProduitMatricielRetourne;
+}
 
 
 
@@ -250,7 +258,7 @@ int main() {
 	vector<vector<vector<unsigned long int>>>vecteurDeMatricesTransposees = ChargerMatricesEnMemoireEtLesTransposer(100, 200, 1024, "mat_input.txt");
 
 	//vecteur produit matriciel: 1024 matrices de 200 par 200
-	vector<vector<vector<unsigned long int>>>vecteurProduitMatriciel1024(1204, vector<vector<unsigned long int>>(200, vector<unsigned long int>(200)));
+	vector<vector<vector<unsigned long int>>>vecteurProduitMatriciel(1024, vector<vector<unsigned long int>>(200, vector<unsigned long int>(200)));
 
 
 	EcrireMatricesDansFichierTexte(vecteurDeMatricesTransposees, "mat_transp.txt");
@@ -259,11 +267,13 @@ int main() {
 	// on rempli les matrices du vecteur de matrices 200 par 200 des 1024 matrices résultant du premier produit matriciel
 	for (int d = 0; d < 1024; d++)
 	{
-		vecteurProduitMatriciel1024[d]=Produit(vecteurDeMatricesOriginal[d], vecteurDeMatricesTransposees[d]);
+		vecteurProduitMatriciel[d]=Produit(vecteurDeMatricesOriginal[d], vecteurDeMatricesTransposees[d]);
 		cout << "matrice faite" << endl;
 	}
 	
 	EcrireMatricesDansFichierTexte(vecteurProduitMatriciel1024, "mat_1024.txt");
+
+
 
 	return 0;
 }
