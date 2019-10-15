@@ -119,10 +119,9 @@ vector<vector<unsigned long int>> LireMatrice(int largeurDeMatrice, int hauteurD
 * @param  matriceB: la deixième matrice
 * @retval la matrice résultante
 */
-vector<vector<unsigned long int>> Produit(vector<vector<unsigned long int>> matriceA, vector<vector<unsigned long int>> matriceB)
+vector<vector<unsigned long int>> CalculerProduitScalaire(vector<vector<unsigned long int>> matriceA, vector<vector<unsigned long int>> matriceB)
 {
-	int case1;
-	case1 = 0;
+	int caseActuelle = 0;
 	int i = 0; //compter nombre colonnes matrice1
 	int j = 0;
 
@@ -145,10 +144,10 @@ vector<vector<unsigned long int>> Produit(vector<vector<unsigned long int>> matr
 			{
 
 				temp = (matriceA[l][m] * matriceB[m][l]);
-				case1 = case1 + temp;
+				caseActuelle = caseActuelle + temp;
 			}
-			matriceC[j][i] = case1;
-			case1 = 0;
+			matriceC[j][i] = caseActuelle;
+			caseActuelle = 0;
 			if (i == (largeurMatriceB - 1))
 			{
 				i = 0;
@@ -202,6 +201,14 @@ int EcrireMatricesDansFichierTexte(vector<vector<vector<unsigned long int>>> vec
 }
 
 
+
+/**
+* @brief  écrit le contenu du vecteur de matrices dans un fichier texte
+* @note
+* @param  vecteurDeMatrices: contient toutes les matrices
+* @param  nomFichier: le nom du fichier dans lequel les matrices seront écrites
+* @retval retourne 0 si la fonction s'est bien déroulée
+*/
 vector<vector<vector<unsigned long int>>> ChargerMatricesEnMemoireEtLesTransposer(int largeurDeMatrices, int hauteurDeMatrice, int nombreDeMatrices, string nomDuFichierDeMatrices)
 {
 	ifstream fichierDeMatrices;
@@ -227,18 +234,6 @@ vector<vector<vector<unsigned long int>>> ChargerMatricesEnMemoireEtLesTranspose
 
 }
 
-
-/**
-* @brief  écrit le contenu du vecteur de matrices dans un fichier texte
-* @note
-* @param  vecteurDeMatrices: contient toutes les matrices
-* @param  nomFichier: le nom du fichier dans lequel les matrices seront écrites
-* @retval retourne 0 si la fonction s'est bien déroulée
-*/
-
-
-
-
 /**
 * @brief  point d'entrée du programme
 * @note   les étapes du programmes sont sous forme de fonction dans le main
@@ -259,7 +254,7 @@ int main() {
 	// on rempli les matrices du vecteur de matrices 200 par 200 des 1024 matrices résultant du premier produit matriciel
 	for (int d = 0; d < 1024; d++)
 	{
-		vecteurProduitMatriciel1024[d]=Produit(vecteurDeMatricesOriginal[d], vecteurDeMatricesTransposees[d]);
+		vecteurProduitMatriciel1024[d]=CalculerProduitScalaire(vecteurDeMatricesOriginal[d], vecteurDeMatricesTransposees[d]);
 		cout << "matrice faite" << endl;
 	}
 	
