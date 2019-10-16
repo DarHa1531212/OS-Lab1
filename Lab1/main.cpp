@@ -162,7 +162,7 @@ vector<vector<unsigned long int>> CalculerProduitMatriciel(vector<vector<unsigne
 				caseActuelle = caseActuelle + temp;
 			}
 			matriceC[i][j] = caseActuelle;
-			
+			caseActuelle = 0;
 		}
 		
 	}
