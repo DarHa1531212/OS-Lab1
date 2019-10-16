@@ -277,7 +277,7 @@ int CalculerChunk(int nbrThreads, int noChunk, vector<vector<vector<unsigned lon
 
 	//Section critique
 
-	//COMMENTER UN PEU LA SECTION
+	//lock_guard essaie de prendre le controle du mutex qu'il recoit, quand le controle sort du scope actuel, le lock_guard est detruit et le mutex est relache
 	lock_guard<mutex> guard(mtx);
 	int position;
 	for (int x = 0; x < tailleChunk; x++)
@@ -308,47 +308,45 @@ int AffecterMatricesPourProduitMatriciel(int nbrDeThreads, vector<vector<vector<
 	switch (nbrDeThreads)
 	{
 		//Possible d'avoir seulement un thread qui execute CalculerChunk.
-	case 1:
-	{
-		std::thread t1([&]() {CalculerChunk(nbrDeThreads, 0, vecteurProduitMatrice); });
-		t1.join();
-		t1.~thread();//Tue les threads
-		break;
+		case 1:
+		{
+			std::thread t1([&]() {CalculerChunk(nbrDeThreads, 0, vecteurProduitMatrice); });
+			t1.join();
+			t1.~thread();//Tue les threads
+			break;
+		}
+
+		//Impossible de traiter les opérations sur les matrices sur 4 threads, mais il y en a assez pour le faire sur 2 threads
+		case 2:
+		{
+			std::thread t1([&]() {CalculerChunk(nbrDeThreads, 0, vecteurProduitMatrice); });
+			std::thread t2([&]() {CalculerChunk(nbrDeThreads, 1, vecteurProduitMatrice); });
+			t1.join();
+			t2.join();
+			t1.~thread();
+			t2.~thread();
+			break;
+		}	
+
+		//Il y a assez de matrices pour affectuer les produits matriciels sur les matrices en utilisant 4threads.
+		case 4:
+		{
+			std::thread t1([&]() {CalculerChunk(nbrDeThreads, 0, vecteurProduitMatrice); });
+			std::thread t2([&]() {CalculerChunk(nbrDeThreads, 1, vecteurProduitMatrice); });
+			std::thread t3([&]() {CalculerChunk(nbrDeThreads, 2, vecteurProduitMatrice); });
+			std::thread t4([&]() {CalculerChunk(nbrDeThreads, 3, vecteurProduitMatrice); });
+			t1.join();
+			t2.join();
+			t3.join();
+			t4.join();
+			t1.~thread();
+			t2.~thread();
+			t3.~thread();
+			t4.~thread();
+			break;
+		}
+
 	}
-
-	//Impossible de traiter les opérations sur les matrices sur 4 threads, mais il y en a assez pour le faire sur 2 threads
-	case 2:
-	{
-		std::thread t1([&]() {CalculerChunk(nbrDeThreads, 0, vecteurProduitMatrice); });
-		std::thread t2([&]() {CalculerChunk(nbrDeThreads, 1, vecteurProduitMatrice); });
-		t1.join();
-		t2.join();
-		t1.~thread();
-		t2.~thread();
-		break;
-	}
-
-	//Il y a assez de matrices pour affectuer les produits matriciels sur les matrices en utilisant 4threads.
-	case 4:
-	{
-		std::thread t1([&]() {CalculerChunk(nbrDeThreads, 0, vecteurProduitMatrice); });
-		std::thread t2([&]() {CalculerChunk(nbrDeThreads, 1, vecteurProduitMatrice); });
-		std::thread t3([&]() {CalculerChunk(nbrDeThreads, 2, vecteurProduitMatrice); });
-		std::thread t4([&]() {CalculerChunk(nbrDeThreads, 3, vecteurProduitMatrice); });
-		t1.join();
-		t2.join();
-		t3.join();
-		t4.join();
-		t1.~thread();
-		t2.~thread();
-		t3.~thread();
-		t4.~thread();
-		break;
-	}
-
-	}
-
-
 
 	return 1;
 }
@@ -361,13 +359,9 @@ int AffecterMatricesPourProduitMatriciel(int nbrDeThreads, vector<vector<vector<
 * @param  vecteurProduitMatrice: contient toutes les matrices
 * @retval Retourne 1 si la fonction s'est exécuté jusqu'à la fin.
 */
-int AffichageFinDuProgramme(vector<vector<unsigned long int>> matriceFinale, int HeureDebutProgramme)
+int AffichageMatriceFinale(vector<vector<unsigned long int>> matriceFinale)
 {
-	int tempsExecution;
 	int compteurLigneAffichage = 0;
-
-	tempsExecution = (time(NULL) - HeureDebutProgramme);
-	cout << "\t" << "L'execution du devoir1 est termine. Le temps d'execution est de " << tempsExecution << " secondes." << "\n\n\n";
 
 	for (int x = 0; x < matriceFinale.size(); x++)
 	{
@@ -400,11 +394,9 @@ int AffichageFinDuProgramme(vector<vector<unsigned long int>> matriceFinale, int
 * @retval retourne 0 si la fonction s'est bien déroulée
 */
 int main() {
-	/*
-		time(NULL) retourne le nombre de seconde écoulé depuis le 1er janvier 1970 à 00:00 (minuit). Cette fonction sera donc appelé à la fin du programme et la différence
-		entre la valeur de retour obtenu à la fin et celle obtenu au début permettera d'obtenir le nombre de secondes écoulé depuis le début de l'exécution.
-	*/
-	unsigned long int heureDebutDuProgramme = time(NULL);
+	
+	//On met le temps actuel dans la varaible start
+	auto start = chrono::system_clock::now();
 
 	vector<vector<vector<unsigned long int>>> vecteurDeMatricesOriginal = RemplirFichier(100, 200, 1024, 500);
 	vector<vector<vector<unsigned long int>>>vecteurDeMatricesTransposees = ChargerMatricesEnMemoireEtLesTransposer(100, 200, 1024, "mat_input.txt");
@@ -427,17 +419,20 @@ int main() {
 
 	//Étape 4b à 4c
 	while (vecteurProduitMatriciel.size() != 1) {
+		
 
 		//pour la gestion du nombre de thread en fonction du nombre de matrice
-		if (vecteurProduitMatriciel.size() >= 8)
+		if (vecteurProduitMatriciel.size() >= 8) 
+		{
 			AffecterMatricesPourProduitMatriciel(4, vecteurProduitMatriciel);
-		else
-			if (vecteurProduitMatriciel.size() >= 4) {
+		}
+		else if (vecteurProduitMatriciel.size() >= 4) 
+		{
 				AffecterMatricesPourProduitMatriciel(2, vecteurProduitMatriciel);
-
-			}
-			else
+		} else 
+		{
 				AffecterMatricesPourProduitMatriciel(1, vecteurProduitMatriciel);
+		}
 
 		vecteurProduitMatriciel = vecteurTemporaire;
 
@@ -446,9 +441,14 @@ int main() {
 		EcrireMatricesDansFichierTexte(vecteurProduitMatriciel, ("mat_" + to_string(vecteurProduitMatriciel.size()) + ".txt"));
 	}
 
-	//Affichage message fin de programme
-	AffichageFinDuProgramme(vecteurProduitMatriciel[0], heureDebutDuProgramme);
+	//Affichage matrice fin de programme
+	AffichageMatriceFinale(vecteurProduitMatriciel[0]);
 
-	system("pause");
+	//On met le temps actuel dans la variable end et on fait end-start pour avoir le temps d'execution
+	auto end = std::chrono::system_clock::now();
+	chrono::duration<double> tempsExecution = end-start;	
+	cout << "\t" << "L'execution du devoir1 est termine. Le temps d'execution est de " << tempsExecution.count() << " secondes." << "\n\n\n";
+
+
 	return 0;
 }
